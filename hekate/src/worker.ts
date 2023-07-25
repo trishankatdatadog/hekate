@@ -25,8 +25,52 @@ export interface Env {
 	// MY_QUEUE: Queue;
 }
 
+async function handleRequest(request: Request): Promise<Response> {
+  try {
+    const { pathname } = new URL(request.url)
+
+    // Check if the request is for the route that handles project names
+    if (pathname.startsWith('/getLatestVersion/')) {
+      const projectName = pathname.replace('/getLatestVersion/', '')
+	  console.log("projectName: ", projectName)
+      const latestVersion = await getLatestPackageVersion(projectName)
+	  console.log("latestVersion: ", latestVersion)
+
+      if (latestVersion) {
+        return new Response(latestVersion, { status: 200 })
+      } else {
+        return new Response('Package not found', { status: 404 })
+      }
+    }
+
+    // Return a 404 response for other routes
+    return new Response('Not found', { status: 404 })
+  } catch (error) {
+    return new Response('Internal Server Error', { status: 500 })
+  }
+}
+
+async function getLatestPackageVersion(projectName: string): Promise<string | null> {
+  try {
+    const npmRegistryURL = `https://registry.npmjs.org/${projectName}`
+    const response = await fetch(npmRegistryURL)
+
+    if (response.ok) {
+	  // https://github.com/node-fetch/node-fetch/issues/1262
+      const data = (await response.json()) as any;
+      return data['dist-tags']?.latest || null
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+}
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		return new Response('Hello World!');
+		return handleRequest(request);
 	},
 };
+
+
