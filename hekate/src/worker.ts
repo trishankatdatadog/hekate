@@ -21,11 +21,12 @@ async function getLatestPackageVersion(projectName: string): Promise<string | nu
       return null
     }
   } catch (error) {
+    console.error(error)
     return null
   }
 }
 
-async function getPackageMetadata(packageName: string, version: string): Promise<string | null> {
+async function getNpmMetadata(packageName: string, version: string): Promise<string | null> {
   try {
     const npmRegistryURL = `https://registry.npmjs.org/${packageName}/${version}`
     const response = await fetch(npmRegistryURL)
@@ -37,6 +38,24 @@ async function getPackageMetadata(packageName: string, version: string): Promise
       return null
     }
   } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+async function getNpmAttestations(packageName: string, version: string): Promise<string | null> {
+  try {
+    const npmRegistryURL = `https://registry.npmjs.org/-/npm/v1/attestations/${packageName}@${version}`
+    const response = await fetch(npmRegistryURL)
+
+    if (response.ok) {
+    // https://github.com/node-fetch/node-fetch/issues/1262
+      return await response.json();
+    } else {
+      return null
+    }
+  } catch (error) {
+    console.error(error)
     return null
   }
 }
@@ -47,17 +66,23 @@ async function handleRequest(request: Request): Promise<Response> {
 
     // Check if the request is for the route that handles package names
     if (pathname.startsWith('/package/')) {
+      // FIXME: Consider a more robust method.
       const packageName = pathname.replace('/package/', '')
       console.log("packageName: ", packageName)
       const latestVersion = await getLatestPackageVersion(packageName)
       console.log("latestVersion: ", latestVersion)
 
-      // FIXME: Probably better to use chained callbacks here rather than nested IF-clauses.
       if (latestVersion) {
-        const metadata = await getPackageMetadata(packageName, latestVersion)
+        const npmMetadata = await getNpmMetadata(packageName, latestVersion)
 
-        if (metadata) {
-          return Response.json(metadata)
+        if (npmMetadata) {
+          const npmAttestations = await getNpmAttestations(packageName, latestVersion)
+
+          if (npmAttestations) {
+            return Response.json(npmAttestations)
+          } else {
+            return new Response(`Attestations not found for ${packageName}@${latestVersion}`, { status: 404 })
+          }
         } else {
           return new Response(`Latest version not found for package: ${packageName}`, { status: 404 })
         }
