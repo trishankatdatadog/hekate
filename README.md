@@ -1,6 +1,8 @@
-# Hekate: Democratizing the monitoring of open-source software supply chains
+# Hekate
 
-## Abstract
+## Democratizing the monitoring of open-source software supply chains
+
+### Abstract
 
 Various parties within the open-source community such as [GitHub, NPM](https://github.blog/2023-04-19-introducing-npm-package-provenance/), and Sigstore are beginning to produce and/or record signed [in-toto](https://in-toto.io/) attestations about how software packages were produced from beginning to end so that we can detect supply chain attacks.
 
@@ -12,7 +14,7 @@ The problem is that:
 
 In this talk, we present [Hekate](https://github.com/trishankatdatadog/hekate), a set of lightweight serverless functions that independent parties can deploy to perform de jure in-toto verifications-as-a-service. To begin with, we use Hekate to verify whether NPM indeed published a package that was built by a GitHub Actions runner which, in turn, used the expected source code from GitHub. This idea is easily [extensible](https://github.com/ossf/wg-securing-software-repos/blob/main/docs/build-provenance-for-all-package-registries.md) to other package repositories such as PyPI and Homebrew. Hekate is not meant to compete with more general efforts such as GUAC, and is designed to integrate seamlessly with observability platforms that provide valuable features for following up such as alerting and case as well as incident management.
 
-## Description
+### Description
 
 An in-toto attestation aims to provide you with authenticated metadata about the inputs, outputs, and environment of a step within a supply chain, so that you can compare metadata between different steps in order to detect an attack. For example, you could answer questions such as: did the builder use the same code that a developer committed to the source code repository, and did the package repository publish the same package that the builder produced?
 
