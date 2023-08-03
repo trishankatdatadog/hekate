@@ -8,9 +8,10 @@ Various parties within the open-source community such as [GitHub and NPM](https:
 
 The problem is that:
 1. There is no de facto standard (yet) for in-toto verification that tells consumers how to verify attestations, but just as importantly, how to correlate information between them.
-2. There is no such verification-as-a-service.
-3. There is no network of such independent verifiers-as-a-service.
-4. There is no way for observability platforms such as [Datadog](https://www.datadoghq.com/) to query this network and act upon results.
+2. Even if there was (1), such in-toto verifiers do not (yet) come preinstalled in most environments.
+3. There is no such verification-as-a-service as a workaround to (2).
+4. There is no network of such independent verifiers-as-a-service.
+5. There is no way for observability platforms such as [Datadog](https://www.datadoghq.com/) to query this network and act upon results.
 
 Thus, we present [Hekate](https://github.com/trishankatdatadog/hekate), a set of lightweight serverless functions that independent parties can deploy to perform de jure in-toto verifications-as-a-service. To begin with, we use Hekate to verify whether NPM indeed published a package that was built by a GitHub Actions runner which, in turn, used the expected source code from GitHub. This idea is easily [extensible](https://github.com/ossf/wg-securing-software-repos/blob/main/docs/build-provenance-for-all-package-registries.md) to other package repositories such as PyPI and Homebrew. Hekate is not meant to compete with more general efforts such as GUAC, and is designed to integrate seamlessly with observability platforms that provide valuable features for following up such as alerting and case as well as incident management.
 
