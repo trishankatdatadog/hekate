@@ -60,6 +60,15 @@ async function getNpmAttestations(packageName: string, version: string): Promise
   }
 }
 
+function extractLogIndex(jsonData: any): string | null {
+  try {
+    const logIndex = jsonData?.attestations?.[0]?.bundle?.verificationMaterial?.tlogEntries?.[0]?.logIndex || null;
+    return logIndex;
+  } catch (error) {
+    return null;
+  }
+}
+
 async function handleRequest(request: Request): Promise<Response> {
   try {
     const { pathname } = new URL(request.url)
@@ -79,6 +88,8 @@ async function handleRequest(request: Request): Promise<Response> {
           const npmAttestations = await getNpmAttestations(packageName, latestVersion)
 
           if (npmAttestations) {
+            const logIndex = extractLogIndex(npmAttestations);
+            console.log("Rekor logIndex: ", logIndex)
             return Response.json(npmAttestations)
           } else {
             return new Response(`Attestations not found for ${packageName}@${latestVersion}`, { status: 404 })
